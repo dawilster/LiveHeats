@@ -3,7 +3,9 @@ import { createContext, useReducer, useEffect } from 'react';
 // Load races from localStorage
 const loadRaces = () => {
   const storedRaces = JSON.parse(localStorage.getItem('races'));
-  return storedRaces ? storedRaces : [];
+
+  // Ensure the stored data is always an array
+  return Array.isArray(storedRaces) ? storedRaces : [];
 };
 
 // Save races to localStorage
@@ -13,79 +15,76 @@ const saveRaces = (races) => {
 
 // ** Consolidated Validation Function **
 const validateRace = (race) => {
+  if (!race.name.trim()) {
+    return "Race name cannot be empty.";
+  }
+
   if (race.competitors.length < 2) {
-    // TODO: Better error handling
-    console.error("A race must have at least two competitors.");
-    return false;
+    return "A race must have at least two competitors.";
   }
 
   const lanes = race.competitors.map((p) => p.lane);
   const hasDuplicateLanes = new Set(lanes).size !== lanes.length;
 
   if (hasDuplicateLanes) {
-    // TODO: Better error handling
-    console.error("Each competitor must have a unique lane.");
-    return false;
+    return "Each competitor must have a unique lane.";
   }
 
-  return true;
+  return null; // No errors
 };
 
 // Reducer function to manage race actions
 const racesReducer = (state, action) => {
   switch (action.type) {
     case 'ADD_RACE': {
-      const newRace = action.payload;
-
-      if (!validateRace(newRace)) {
-        return state; // Reject invalid race data
+      const error = validateRace(action.payload);
+      if (error) {
+        return { ...state, error }; // Keep error in state but don't modify races
       }
 
-      const newRaces = [...state, newRace];
+      const newRaces = [...state.races, action.payload]; // Ensure races remain an array
       saveRaces(newRaces);
-      return newRaces;
+      return { races: newRaces, error: null };
     }
 
     case 'UPDATE_RACE': {
-      const updatedRace = action.payload;
-
-      if (!validateRace(updatedRace)) {
-        return state; // Reject invalid race data
+      const error = validateRace(action.payload);
+      if (error) {
+        return { ...state, error };
       }
 
-      const updatedRaces = state.map((race) =>
-        race.id === updatedRace.id ? updatedRace : race
+      const updatedRaces = state.races.map((race) =>
+        race.id === action.payload.id ? action.payload : race
       );
 
       saveRaces(updatedRaces);
-      return updatedRaces;
+      return { races: updatedRaces, error: null };
     }
 
     case 'DELETE_RACE': {
-      const filteredRaces = state.filter((race) => race.id !== action.payload);
+      const filteredRaces = state.races.filter((race) => race.id !== action.payload);
       saveRaces(filteredRaces);
-      return filteredRaces;
+      return { races: filteredRaces, error: null };
     }
 
     default:
       return state;
   }
 };
-
 // Context creation
 export const RacesContext = createContext();
 
 // Provider component
 export const RacesProvider = ({ children }) => {
-  const [races, dispatch] = useReducer(racesReducer, [], loadRaces);
+  const [state, dispatch] = useReducer(racesReducer, { races: loadRaces(), error: null });
 
-  // Sync localStorage whenever races change
+  // Only update localStorage when `state.races` changes (not when `error` updates)
   useEffect(() => {
-    saveRaces(races);
-  }, [races]);
+    saveRaces(state.races);
+  }, [state.races]);
 
   return (
-    <RacesContext.Provider value={{ races, dispatch }}>
+    <RacesContext.Provider value={{ races: state.races, error: state.error, dispatch }}>
       {children}
     </RacesContext.Provider>
   );

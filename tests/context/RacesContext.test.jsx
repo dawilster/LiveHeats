@@ -62,6 +62,27 @@ describe('RacesContext', () => {
     expect(screen.getByTestId('races-count')).toHaveTextContent('0');
   });
 
+  it('prevents adding a new race if race name is empty', () => {
+    render(
+      <RacesProvider>
+        <TestComponent action={(dispatch) =>
+          act(() => dispatch({
+            type: 'ADD_RACE',
+            payload: {
+              id: '2',
+              name: '',
+              competitors: [{ id: 'student-1', name: 'Alice', lane: 1, placement: null }],
+            },
+          }))
+        } />
+      </RacesProvider>
+    );
+
+    // Race should NOT be added because it only has 1 participant
+    expect(screen.getByTestId('races-count')).toHaveTextContent('0');
+  });
+
+
   it('adds a valid race and updates localStorage', () => {
     render(
       <RacesProvider>

@@ -21,8 +21,8 @@ describe('RacesIndex Component', () => {
 
   it('displays a list of races from localStorage', () => {
     const mockRaces = [
-      { id: '1', name: 'Race 1', participants: [] },
-      { id: '2', name: 'Race 2', participants: [] },
+      { id: '1', name: 'Race 1', competitors: [] },
+      { id: '2', name: 'Race 2', competitors: [] },
     ];
     localStorage.setItem('races', JSON.stringify(mockRaces));
 
@@ -52,7 +52,7 @@ describe('RacesIndex Component', () => {
 
   it('navigates to the correct race details when a race is clicked', () => {
     const mockRaces = [
-      { id: '1', name: 'Race 1', participants: [] },
+      { id: '1', name: 'Race 1', competitors: [] },
     ];
     localStorage.setItem('races', JSON.stringify(mockRaces));
 

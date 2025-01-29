@@ -1,14 +1,19 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import RacesIndex from './pages/RacesIndex';
-import './App.css'
+import { RacesProvider } from '@/context/RacesContext';
+import RacesIndex from '@/pages/RacesIndex';
+import RaceNew from '@/pages/RaceNew';
+import './App.css';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<RacesIndex />} />
-      </Routes>
-    </Router>
+    <RacesProvider> {/* Wrap the entire app */}
+      <Router>
+        <Routes>
+          <Route path="/" element={<RacesIndex />} />
+          <Route path="/races/new" element={<RaceNew />} />
+        </Routes>
+      </Router>
+    </RacesProvider>
   );
 }
 
