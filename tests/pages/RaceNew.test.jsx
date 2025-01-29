@@ -67,6 +67,29 @@ describe('RaceNew Page', () => {
     expect(screen.getByLabelText(/Lane Number/i)).toHaveTextContent('2');
   });
 
+  it('auto-selects the first available lane and updates correctly when competitors are added', () => {
+    renderWithProviders(<RaceNew />);
+
+    // Check that the first lane is preselected (should be Lane 1 initially)
+    expect(screen.getByLabelText(/Lane Number/i)).toHaveValue("1");
+
+    // Add the first competitor (Alice in Lane 1)
+    fireEvent.change(screen.getByLabelText(/Competitor Name/i), { target: { value: 'Alice' } });
+    fireEvent.change(screen.getByLabelText(/Lane Number/i), { target: { value: '1' } });
+    fireEvent.click(screen.getByRole('button', { name: /Add Competitor/i }));
+
+    // The next available lane should now be preselected (Lane 2)
+    expect(screen.getByLabelText(/Lane Number/i)).toHaveValue("2");
+
+    // Add the second competitor (Bob in Lane 2)
+    fireEvent.change(screen.getByLabelText(/Competitor Name/i), { target: { value: 'Bob' } });
+    fireEvent.change(screen.getByLabelText(/Lane Number/i), { target: { value: '2' } });
+    fireEvent.click(screen.getByRole('button', { name: /Add Competitor/i }));
+
+    // Ensure the next available lane (Lane 3) is selected after adding Bob
+    expect(screen.getByLabelText(/Lane Number/i)).toHaveValue("3");
+  });
+
   it('prevents saving without at least two participants', () => {
     renderWithProviders(<RaceNew />);
 

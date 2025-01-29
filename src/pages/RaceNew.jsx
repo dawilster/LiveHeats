@@ -12,10 +12,18 @@ const RaceNew = () => {
   const [laneNumber, setLaneNumber] = useState('');
   const [localError, setLocalError] = useState(null); // Store local errors
   const [saving, setSaving] = useState(false); // Track when "Save Race" is clicked
+  const [availableLanes, setAvailableLanes] = useState([]);
 
-  const availableLanes = Array.from({ length: 10 }, (_, i) => i + 1).filter(
-    (lane) => !competitors.some((competitor) => competitor.lane === lane)
-  );
+  // Auto-selects the first available lane when competitors are updated.
+  useEffect(() => {
+    // Compute available lanes dynamically
+    const updatedAvailableLanes = Array.from({ length: 100 }, (_, i) => i + 1).filter(
+      (lane) => !competitors.some((competitor) => competitor.lane === lane)
+    );
+
+    setAvailableLanes(updatedAvailableLanes);
+    setLaneNumber(updatedAvailableLanes[0] || ''); // Auto-select first available lane
+  }, [competitors]);
 
   const addCompetitor = () => {
     if (!competitorName.trim() || !laneNumber) {
@@ -29,13 +37,12 @@ const RaceNew = () => {
     ]);
 
     setCompetitorName('');
-    setLaneNumber(availableLanes[0] || '');
     setLocalError(null); // Clear errors on successful add
   };
 
   const saveRace = () => {
     setSaving(true); // Mark saving state
-    
+
     const newRace = { id: Date.now().toString(), name: raceName, competitors };
     dispatch({ type: 'ADD_RACE', payload: newRace });
   };
