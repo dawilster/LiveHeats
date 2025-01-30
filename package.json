@@ -11,6 +11,8 @@
     "test": "vite test"
   },
   "dependencies": {
+    "@shadcn/ui": "^0.0.4",
+    "@tailwindcss/vite": "^4.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.1.3"
@@ -28,6 +30,7 @@
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
     "jsdom": "^26.0.0",
+    "tailwindcss": "^4.0.1",
     "vite": "^6.0.5",
     "vitest": "^3.0.4"
   }
