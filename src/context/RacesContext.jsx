@@ -22,7 +22,7 @@ const validateCompetitors = (competitors) => {
   }
 
   if (competitors.some((c) => c.lane === '' || c.lane === null)) {
-    return "All competitors must have a valid lane.";
+    return "All competitors must have a valid lane number.";
   }
 
   const lanes = competitors.map((c) => c.lane);
