@@ -267,4 +267,98 @@ describe('RacesContext', () => {
     expect(storedRaces.length).toBe(0);
   });
 
+
+  describe('RacesContext - Placement Validation', () => {
+    it('allows correctly ordered placements', () => {
+      render(
+        <RacesProvider>
+          <TestComponent action={(dispatch) =>
+            act(() => dispatch({
+              type: 'ADD_RACE',
+              payload: {
+                id: '1',
+                name: 'Valid Race',
+                competitors: [
+                  { id: 'c1', name: 'Alice', lane: 1, placement: 1 },
+                  { id: 'c2', name: 'Bob', lane: 2, placement: 2 },
+                  { id: 'c3', name: 'Charlie', lane: 3, placement: 3 },
+                ],
+              },
+            }))
+          } />
+        </RacesProvider>
+      );
+
+      expect(screen.getByTestId('races-count')).toHaveTextContent('1');
+    });
+
+    it('rejects placements with gaps (e.g., 1, 2, 4)', () => {
+      render(
+        <RacesProvider>
+          <TestComponent action={(dispatch) =>
+            act(() => dispatch({
+              type: 'ADD_RACE',
+              payload: {
+                id: '2',
+                name: 'Invalid Placement Race',
+                competitors: [
+                  { id: 'c1', name: 'Alice', lane: 1, placement: 1 },
+                  { id: 'c2', name: 'Bob', lane: 2, placement: 2 },
+                  { id: 'c3', name: 'Charlie', lane: 3, placement: 4 }, // Skips 3
+                ],
+              },
+            }))
+          } />
+        </RacesProvider>
+      );
+
+      expect(screen.getByTestId('races-count')).toHaveTextContent('0');
+    });
+
+    it('allows tied placements with correct skipping (e.g., 1, 1, 3)', () => {
+      render(
+        <RacesProvider>
+          <TestComponent action={(dispatch) =>
+            act(() => dispatch({
+              type: 'ADD_RACE',
+              payload: {
+                id: '3',
+                name: 'Tied Placement Race',
+                competitors: [
+                  { id: 'c1', name: 'Alice', lane: 1, placement: 1 },
+                  { id: 'c2', name: 'Bob', lane: 2, placement: 1 },
+                  { id: 'c3', name: 'Charlie', lane: 3, placement: 3 }, // Correctly skips 2
+                ],
+              },
+            }))
+          } />
+        </RacesProvider>
+      );
+
+      expect(screen.getByTestId('races-count')).toHaveTextContent('1');
+    });
+
+    it('rejects tied placements if they do not skip correctly (e.g., 1, 1, 2)', () => {
+      render(
+        <RacesProvider>
+          <TestComponent action={(dispatch) =>
+            act(() => dispatch({
+              type: 'ADD_RACE',
+              payload: {
+                id: '4',
+                name: 'Incorrect Tied Placement Race',
+                competitors: [
+                  { id: 'c1', name: 'Alice', lane: 1, placement: 1 },
+                  { id: 'c2', name: 'Bob', lane: 2, placement: 1 },
+                  { id: 'c3', name: 'Charlie', lane: 3, placement: 2 }, // Should be 3
+                ],
+              },
+            }))
+          } />
+        </RacesProvider>
+      );
+
+      expect(screen.getByTestId('races-count')).toHaveTextContent('0');
+    });
+  });
 });

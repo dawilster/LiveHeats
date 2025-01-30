@@ -3,14 +3,66 @@ import { createContext, useReducer, useEffect } from 'react';
 // Load races from localStorage
 const loadRaces = () => {
   const storedRaces = JSON.parse(localStorage.getItem('races'));
-
-  // Ensure the stored data is always an array
   return Array.isArray(storedRaces) ? storedRaces : [];
 };
 
 // Save races to localStorage
 const saveRaces = (races) => {
   localStorage.setItem('races', JSON.stringify(races));
+};
+
+// ** Extracted Competitor Validation **
+const validateCompetitors = (competitors) => {
+  if (competitors.length < 2) {
+    return "A race must have at least two competitors.";
+  }
+
+  if (competitors.some((c) => !c.name.trim())) {
+    return "All competitors must have a name.";
+  }
+
+  if (competitors.some((c) => c.lane === '' || c.lane === null)) {
+    return "All competitors must have a valid lane.";
+  }
+
+  const lanes = competitors.map((c) => c.lane);
+  if (new Set(lanes).size !== lanes.length) {
+    return "Each competitor must have a unique lane.";
+  }
+
+  return null;
+};
+
+const validatePlacements = (competitors) => {
+  // Extract placement values, convert them to integers, and filter out invalid (non-numeric) values
+  const placements = competitors
+    .map((c) => parseInt(c.placement, 10)) // Convert placement to integer
+    .filter((p) => !isNaN(p)) // Remove invalid placements (null, undefined, empty string, NaN)
+    .sort((a, b) => a - b); // Sort placements in ascending order for proper validation
+
+  // If no placements exist, return null (no validation needed)
+  if (placements.length === 0) return null;
+
+  let expectedRank = 1; // Start tracking the expected placement rank
+  let i = 0; // Iterator to traverse placements array
+
+  while (i < placements.length) {
+    // Count how many competitors have the same placement (ties)
+    const count = placements.filter(p => p === placements[i]).length;
+
+    // Check if the placement value matches the expected ranking position
+    if (placements[i] !== expectedRank) {
+      return "Placements must be sequential without gaps, while handling ties correctly.";
+    }
+
+    // Adjust expected ranking by skipping the correct number of tied competitors
+    expectedRank += count;
+
+    // Move index forward by the number of competitors sharing this placement
+    i += count;
+  }
+
+  return null; // If all checks pass, return null (valid placements)
 };
 
 // ** Consolidated Validation Function **
@@ -23,26 +75,11 @@ const validateRace = (race) => {
     return "Race name cannot be empty.";
   }
 
-  if (race.competitors.length < 2) {
-    return "A race must have at least two competitors.";
-  }
+  const competitorError = validateCompetitors(race.competitors);
+  if (competitorError) return competitorError;
 
-  // Check for empty competitor names
-  if (race.competitors.some((competitor) => !competitor.name.trim())) {
-    return "All competitors must have a name.";
-  }
-
-  // Check for empty or invalid competitor lanes
-  if (race.competitors.some((competitor) => competitor.lane === '' || competitor.lane === null)) {
-    return "All competitors must have a valid lane.";
-  }
-
-  const lanes = race.competitors.map((p) => p.lane);
-  const hasDuplicateLanes = new Set(lanes).size !== lanes.length;
-
-  if (hasDuplicateLanes) {
-    return "Each competitor must have a unique lane.";
-  }
+  const placementError = validatePlacements(race.competitors);
+  if (placementError) return placementError;
 
   return null; // No errors
 };
@@ -53,12 +90,12 @@ const racesReducer = (state, action) => {
     case 'ADD_RACE': {
       const newRace = {
         ...action.payload,
-        id: action.payload.id || Date.now().toString(), // Ensure a unique ID
+        id: action.payload.id || Date.now().toString(),
       };
 
       const error = validateRace(newRace);
       if (error) {
-        return { ...state, error }; // Keep error in state but don't modify races
+        return { ...state, error };
       }
 
       const newRaces = [...state.races, newRace];
@@ -90,6 +127,7 @@ const racesReducer = (state, action) => {
       return state;
   }
 };
+
 // Context creation
 export const RacesContext = createContext();
 
@@ -97,7 +135,6 @@ export const RacesContext = createContext();
 export const RacesProvider = ({ children }) => {
   const [state, dispatch] = useReducer(racesReducer, { races: loadRaces(), error: null });
 
-  // Only update localStorage when `state.races` changes (not when `error` updates)
   useEffect(() => {
     saveRaces(state.races);
   }, [state.races]);
