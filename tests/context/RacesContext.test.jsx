@@ -113,6 +113,51 @@ describe('RacesContext', () => {
     expect(screen.getByTestId('races-count')).toHaveTextContent('0');
   });
 
+  it('prevents adding a race if any competitor name is empty', () => {
+    render(
+      <RacesProvider>
+        <TestComponent action={(dispatch) =>
+          act(() => dispatch({
+            type: 'ADD_RACE',
+            payload: {
+              id: '7',
+              name: 'Race with Empty Name',
+              competitors: [
+                { id: 'student-1', name: '', lane: 1, placement: null }, 
+                { id: 'student-2', name: 'Bob', lane: 2, placement: null },
+              ],
+            },
+          }))
+        } />
+      </RacesProvider>
+    );
+
+    // Race should NOT be added due to empty competitor name
+    expect(screen.getByTestId('races-count')).toHaveTextContent('0');
+  });
+
+  it('prevents adding a race if any competitor has an empty lane', () => {
+    render(
+      <RacesProvider>
+        <TestComponent action={(dispatch) =>
+          act(() => dispatch({
+            type: 'ADD_RACE',
+            payload: {
+              id: '9',
+              name: 'Race with Empty Lane',
+              competitors: [
+                { id: 'competitor-1', name: 'Alice', lane: '', placement: null }, // Invalid empty lane
+                { id: 'competitor-2', name: 'Bob', lane: 2, placement: null },
+              ],
+            },
+          }))
+        } />
+      </RacesProvider>
+    );
+
+    // Race should NOT be added due to an empty lane
+    expect(screen.getByTestId('races-count')).toHaveTextContent('0');
+  });
 
   it('adds a valid race and updates localStorage', () => {
     render(

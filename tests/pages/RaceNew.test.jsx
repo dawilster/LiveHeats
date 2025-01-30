@@ -23,7 +23,7 @@ const renderWithProviders = (ui) => {
 };
 
 describe('RaceNew Page', () => {
-  it('renders the RaceForm component', () => {
+  it('renders the RaceForm component with default elements', () => {
     renderWithProviders(<RaceNew />);
 
     expect(screen.getByLabelText(/Race Name/i)).toBeInTheDocument();
@@ -41,19 +41,21 @@ describe('RaceNew Page', () => {
     fireEvent.change(screen.getByLabelText(/Race Name/i), { target: { value: 'Test Race' } });
 
     // Add first competitor
-    fireEvent.change(screen.getByLabelText(/Competitor Name/i), { target: { value: 'Alice' } });
-    fireEvent.change(screen.getByLabelText(/Lane Number/i), { target: { value: '1' } });
     fireEvent.click(screen.getByRole('button', { name: /Add Competitor/i }));
+    fireEvent.change(screen.getAllByPlaceholderText(/Competitor Name/i)[0], { target: { value: 'Alice' } });
+    fireEvent.change(screen.getAllByTestId('lane-input')[0], { target: { value: '1' } });
 
-    // Add second competitor
-    fireEvent.change(screen.getByLabelText(/Competitor Name/i), { target: { value: 'Bob' } });
-    fireEvent.change(screen.getByLabelText(/Lane Number/i), { target: { value: '2' } });
+    // // Add second competitor
     fireEvent.click(screen.getByRole('button', { name: /Add Competitor/i }));
+    fireEvent.change(screen.getAllByLabelText(/Competitor Name/i)[1], { target: { value: 'Bob' } });
+    fireEvent.change(screen.getAllByTestId('lane-input')[1], { target: { value: '2' } });
 
     // Submit the form inside `act()` to handle async updates
-    fireEvent.click(screen.getByRole('button', { name: /Save Race/i }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Save Race/i }));
+    });
 
-    // Ensure navigation happens only after a valid race submission
+    // // Ensure navigation happens only after a valid race submission
     expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 });

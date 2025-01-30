@@ -27,6 +27,16 @@ const validateRace = (race) => {
     return "A race must have at least two competitors.";
   }
 
+  // Check for empty competitor names
+  if (race.competitors.some((competitor) => !competitor.name.trim())) {
+    return "All competitors must have a name.";
+  }
+
+  // Check for empty or invalid competitor lanes
+  if (race.competitors.some((competitor) => competitor.lane === '' || competitor.lane === null)) {
+    return "All competitors must have a valid lane.";
+  }
+
   const lanes = race.competitors.map((p) => p.lane);
   const hasDuplicateLanes = new Set(lanes).size !== lanes.length;
 
