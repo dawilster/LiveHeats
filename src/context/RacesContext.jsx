@@ -15,6 +15,10 @@ const saveRaces = (races) => {
 
 // ** Consolidated Validation Function **
 const validateRace = (race) => {
+  if (!race.id || typeof race.id !== 'string' || race.id.trim() === '') {
+    return "Race ID is missing or invalid.";
+  }
+
   if (!race.name.trim()) {
     return "Race name cannot be empty.";
   }
@@ -37,12 +41,17 @@ const validateRace = (race) => {
 const racesReducer = (state, action) => {
   switch (action.type) {
     case 'ADD_RACE': {
-      const error = validateRace(action.payload);
+      const newRace = {
+        ...action.payload,
+        id: action.payload.id || Date.now().toString(), // Ensure a unique ID
+      };
+
+      const error = validateRace(newRace);
       if (error) {
         return { ...state, error }; // Keep error in state but don't modify races
       }
 
-      const newRaces = [...state.races, action.payload]; // Ensure races remain an array
+      const newRaces = [...state.races, newRace];
       saveRaces(newRaces);
       return { races: newRaces, error: null };
     }

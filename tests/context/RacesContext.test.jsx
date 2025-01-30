@@ -42,6 +42,37 @@ describe('RacesContext', () => {
     expect(screen.getByText('Race 1')).toBeInTheDocument();
   });
 
+  it('automatically assigns an ID if missing on ADD_RACE', () => {
+    render(
+      <RacesProvider>
+        <TestComponent action={(dispatch) =>
+          act(() => dispatch({
+            type: 'ADD_RACE',
+            payload: {
+              name: 'Race Without ID',
+              competitors: [
+                { id: 'student-1', name: 'Alice', lane: 1, placement: null },
+                { id: 'student-2', name: 'Bob', lane: 2, placement: null },
+              ],
+            },
+          }))
+        } />
+      </RacesProvider>
+    );
+
+    // Ensure race is added
+    expect(screen.getByTestId('races-count')).toHaveTextContent('1');
+
+    // Retrieve race from localStorage
+    const storedRaces = JSON.parse(localStorage.getItem('races'));
+    expect(storedRaces.length).toBe(1);
+
+    // Ensure race has an ID assigned automatically
+    expect(storedRaces[0].id).toBeDefined();
+    expect(typeof storedRaces[0].id).toBe("string");
+    expect(storedRaces[0].id.trim()).not.toBe('');
+  });
+
   it('adds a new race only if it has at least two competitors', () => {
     render(
       <RacesProvider>
