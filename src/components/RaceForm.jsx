@@ -3,27 +3,14 @@ import { useNavigate } from 'react-router-dom';
 
 const RaceForm = ({ race, onSubmit, onChange, error }) => {
   const [localError, setLocalError] = useState(null);
-  const [availableLanes, setAvailableLanes] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const updatedAvailableLanes = Array.from({ length: 10 }, (_, i) => i + 1).filter(
-      (lane) => !race.competitors.some((competitor) => competitor.lane === lane)
-    );
-    setAvailableLanes(updatedAvailableLanes);
-  }, [race.competitors]);
-
   const addCompetitor = () => {
-    if (availableLanes.length === 0) {
-      setLocalError("No available lanes left.");
-      return;
-    }
-
     const newCompetitor = {
       id: Date.now().toString(),
       name: '',
-      lane: availableLanes[0],
-      placement: null,
+      lane: '',
+      placement: '',
     };
 
     onChange({ ...race, competitors: [...race.competitors, newCompetitor] });
@@ -70,13 +57,14 @@ const RaceForm = ({ race, onSubmit, onChange, error }) => {
                 <tr>
                   <th scope="col" className="px-6 py-3 font-medium text-gray-500">Competitor Name</th>
                   <th scope="col" className="px-6 py-3 font-medium text-gray-500">Lane</th>
+                  <th scope="col" className="px-6 py-3 font-medium text-gray-500">Place</th>
                   <th scope="col" className="px-6 py-3 font-medium text-gray-500">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-300">
                 {race.competitors.length === 0 ? (
                   <tr>
-                    <td colSpan="3" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
                       No competitors yet, click <span className="font-medium text-blue-500">"Add Competitor"</span> to add your first.
                     </td>
                   </tr>
@@ -103,12 +91,31 @@ const RaceForm = ({ race, onSubmit, onChange, error }) => {
                           type="number"
                           min="1"
                           max="100"
-                          placeholder='0'
+                          placeholder="0"
+                          value={competitor.lane}
                           onChange={(e) => {
                             const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
                             updateCompetitor(competitor.id, 'lane', value ? parseInt(value, 10) : '');
                           }}
                           className="px-3 py-2 border border-gray-300 rounded-md w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </td>
+                      {/* Placement Field - Show only if editing a race */}
+                      <td className="px-6 py-4">
+                        <label htmlFor={`placement-${competitor.id}`} className="sr-only">
+                          Placement
+                        </label>
+                        <input
+                          data-testid="place-input"
+                          id={`place-${competitor.id}`}
+                          type="number"
+                          min="1"
+                          max="100"
+                          placeholder="0"
+                          value={competitor.placement || ''}
+                          onChange={(e) => updateCompetitor(competitor.id, 'placement', e.target.value)}
+                          disabled={!race.id} // ✅ Disables the input when race.id is missing
+                          className="px-3 py-2 border border-gray-300 rounded-md w-24 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         />
                       </td>
                       <td className="px-6 py-4">
