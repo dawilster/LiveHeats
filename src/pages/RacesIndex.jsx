@@ -18,7 +18,7 @@ export default function RacesIndex() {
         <h1 className="text-2xl font-bold text-gray-900">Race Events</h1>
         <Link to="/races/new">
           <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-            Add Event
+            Add Race
           </button>
         </Link>
       </div>

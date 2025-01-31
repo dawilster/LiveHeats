@@ -44,7 +44,7 @@ describe('RacesIndex Component', () => {
       </MemoryRouter>
     );
 
-    const addButton = screen.getByText(/add event/i);
+    const addButton = screen.getByText("Add Race");
     expect(addButton).toBeInTheDocument();
 
     expect(addButton.closest('a')).toHaveAttribute('href', '/races/new');
