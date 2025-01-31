@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import RaceStatusBadge from "@/components/RaceStatusBadge"; 
 
 export default function RacesIndex() {
   const [races, setRaces] = useState([]);
@@ -9,26 +10,6 @@ export default function RacesIndex() {
     const storedRaces = JSON.parse(localStorage.getItem("races")) || [];
     setRaces(storedRaces);
   }, []);
-
-  const getStatusBadge = (status) => {
-    const styles = {
-      upcoming: "bg-blue-100 text-blue-800",
-      in_progress: "bg-yellow-100 text-yellow-800",
-      completed: "bg-green-100 text-green-800",
-    };
-
-    const labels = {
-      upcoming: "Upcoming",
-      in_progress: "In Progress",
-      completed: "Completed",
-    };
-
-    return (
-      <span className={`px-3 py-1 rounded-full text-sm ${styles[status]}`}>
-        {labels[status]}
-      </span>
-    );
-  };
 
   return (
     <div className="max-w-6xl mx-auto p-4">
@@ -56,18 +37,6 @@ export default function RacesIndex() {
               <div className="text-sm text-gray-500">Total Events</div>
               <div className="text-2xl font-bold">{races.length}</div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow">
-              <div className="text-sm text-gray-500">Upcoming Events</div>
-              <div className="text-2xl font-bold">
-                {races.filter((race) => race.status === "upcoming").length}
-              </div>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow">
-              <div className="text-sm text-gray-500">Total Competitors</div>
-              <div className="text-2xl font-bold">
-                {races.reduce((sum, race) => sum + (race.competitors?.length || 0), 0)}
-              </div>
-            </div>
           </div>
 
           {/* Race List */}
@@ -79,7 +48,6 @@ export default function RacesIndex() {
                     <th className="px-6 py-3 font-medium text-gray-500">Event Name</th>
                     <th className="px-6 py-3 font-medium text-gray-500">Date</th>
                     <th className="px-6 py-3 font-medium text-gray-500">Venue</th>
-                    <th className="px-6 py-3 font-medium text-gray-500">Heats</th>
                     <th className="px-6 py-3 font-medium text-gray-500">Competitors</th>
                     <th className="px-6 py-3 font-medium text-gray-500">Status</th>
                     <th className="px-6 py-3 font-medium text-gray-500">Actions</th>
@@ -97,17 +65,22 @@ export default function RacesIndex() {
                         {race.date ? new Date(race.date).toLocaleDateString() : "TBD"}
                       </td>
                       <td className="px-6 py-4">{race.venue || "Unknown"}</td>
-                      <td className="px-6 py-4">{race.heats || 0}</td>
                       <td className="px-6 py-4">{race.competitors?.length || 0}</td>
-                      <td className="px-6 py-4">{getStatusBadge(race.status)}</td>
+                      <td className="px-6 py-4"><RaceStatusBadge race={race} /></td>                      
                       <td className="px-6 py-4">
                         <div className="flex space-x-2">
-                          <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
-                            View
-                          </button>
-                          <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
-                            Edit
-                          </button>
+                          <Link to={`/races/${race.id}`}>
+                            <button
+                              className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                              View Results
+                            </button>
+                          </Link>
+                          <Link to={`/races/${race.id}/edit`}>
+                            <button
+                              className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                              Edit
+                            </button>
+                          </Link>
                         </div>
                       </td>
                     </tr>
