@@ -2,6 +2,14 @@
 
 Welcome to the **LiveHeats** project! This guide provides instructions on setting up the project, installing dependencies, running the application, and executing tests.
 
+![app homepage screenshot](app.png)
+
+🔗 **Live Demo:** [https://live-heats.vercel.app/](https://live-heats.vercel.app/)
+
+## 📌 Project Requirements
+
+For a detailed list of features and requirements, see [Project Requirements](Requirements.md).
+
 ---
 
 ## 📌 Table of Contents
